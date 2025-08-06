@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Roblox</title>
+<link rel="icon" href="new-roblox-logo-991228798-removebg-preview.png" type="image/svg+xml">
+
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-image: linear-gradient(rgba(110, 177, 77, 0.5), rgba(110, 177, 77, 0.5)), url('https://img.growagardencalculator.net/logo/grow-a-garden-logo-with-bg.webp');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      animation: floatBG 30s ease-in-out infinite alternate;
+    }
+
+    @keyframes floatBG {
+      0% {
+        background-position: center top;
+      }
+      100% {
+        background-position: center bottom;
+      }
+    }
+
+    h1 {
+      background-color: rgba(110, 177, 77, 0.9);
+      padding: 20px;
+      text-align: center;
+      margin: 0;
+      color: white;
+      text-shadow: 1px 1px #444;
+    }
+
+    .search-container {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    #searchInput {
+      padding: 10px;
+      width: 250px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .tier-section {
+      padding: 0 40px;
+    }
+
+    .tier-title {
+      font-size: 22px;
+      margin-top: 40px;
+      color: #1a3b1c;
+      background: rgba(255, 255, 255, 0.7);
+      padding: 5px 10px;
+      display: inline-block;
+      border-radius: 5px;
+    }
+
+    .pet-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .pet-card {
+      width: 140px;
+      background-color: white;
+      padding: 10px;
+      border: 2px solid green;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 128, 0, 0.2);
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .pet-card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 16px rgba(0, 128, 0, 0.3);
+    }
+
+    .pet-card.selected {
+      border-color: #ff9800;
+      background-color: #fff3e0;
+    }
+
+    .pet-image {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      background-color: #f0f0f0;
+      border-radius: 8px;
+    }
+
+    .overlay {
+      display: none;
+    }
+
+    .overlay.active {
+      display: flex;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .modal {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      max-height: 90vh;
+      width: 400px;
+      overflow-y: auto;
+      text-align: center;
+    }
+
+    .submit-btn {
+      background: #28a745;
+      border: none;
+      padding: 10px 20px;
+      margin-top: 10px;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+      border-radius: 5px;
+    }
+
+    .cancel-btn {
+      background: #ccc;
+      border: none;
+      padding: 8px 16px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    .selection-banner {
+      background-color: #d0f0c0;
+      padding: 10px;
+      text-align: center;
+      font-weight: bold;
+      color: #1b5e20;
+      margin: 20px auto;
+      font-size: 18px;
+    }
+
+    .claim-now-btn {
+      margin-left: 10px;
+      background-color: #2196f3;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .selected-pet-list {
+      margin-top: 15px;
+      text-align: left;
+    }
+
+    .selected-pet {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .selected-pet img {
+      width: 40px;
+      height: 40px;
+      margin-right: 10px;
+      border-radius: 5px;
+    }
+
+    .view-selected-btn {
+      background-color: #9c27b0;
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+
+ 
+  <h1>
+    🌿 Grow a Garden | Pet Tier List 🌸
+  </h1>
+
+  <div class="search-container">
+    <input type="text" id="searchInput" placeholder="Search pets..." />
+  </div>
+
+  <div id="selectionMessage" class="selection-banner">
+    You selected 0 pets — Claim now or add more packages.
+    <button class="claim-now-btn" onclick="showModal()">Claim Now</button>
+  </div>
+
+  <!-- ✅ Fixed: This container was missing -->
+  <div id="petContainer" class="tier-section"></div>
+
+  <!-- ✅ Fixed: Modal ID consistent -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <h2>CONTINUE</h2>
+      <p>Here are your selected pets:</p>
+      <div class="selected-pet-list" id="selectedPetList"></div>
+      <a href="https://www.robiox.com.tg/games/126884695634066/Grow-a-Garden?privateServerLinkCode=785724493068546330354045197327" target="_blank">
+        <button class="submit-btn">JOIN VIA PRIVATE SERVER</button>
+      </a>
+      <br>
+      <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    const pets = {
+      S: [
+        { name: "Kitsune", ability: "Stealth teleport", image: "kitsune-removebg-preview.png" },
+        { name: "Raccoon", ability: "Steals items", image: "Raccon_Better_Quality-removebg-preview (1).png" },
+        { name: "Disco Bee", ability: "Stuns enemies", image: "DiscoBeeIcon-removebg-preview.png" },
+        { name: "TRex", ability: "High damage roar", image: "T-Rex.webp" },
+        { name: "Corrupted Kitsune", ability: "Dark dash", image: "how-to-get-corrupted-kitsune-grow-a-garden-removebg-preview.png" },
+        { name: "Raiju", ability: "Lightning speed", image: "Raiju-removebg-preview.png" },
+        { name: "French Fry Ferret", ability: "Fast dodge", image: "FrenchFryFerret-removebg-preview.png" },
+        { name: "Spinosaurus", ability: "Water attack", image: "Spinosaurus-removebg-preview.png" },
+        { name: "Dragonfly", ability: "Flying boost", image: "DragonflyIcon-removebg-preview.png" },
+        { name: "Butterfly", ability: "Charm effect", image: "Thy_Butterfly_V2-removebg-preview.png" },
+        { name: "Queen Bee", ability: "Speedy escape", image: "Queen_bee-removebg-preview.png" },
+        { name: "Moon Cat", ability: "Night vision", image: "Moon_Cat-removebg-preview.png" },
+        { name: "Spaghetti Sloth", ability: "Sticky trap", image: "SpaghettiSloth-removebg-preview.png" },
+        { name: "Kappa", ability: "Water burst", image: "Kappa_-removebg-preview.png" },
+      ],
+      A: [
+        { name: "Sushi Bear", ability: "Health regen", image: "Grow_a_Garden_Sushi_Bear_Pet-removebg-preview.png" },
+        { name: "Triceratops", ability: "Shield charge", image: "Triceratops-removebg-preview.png" },
+        { name: "Pterodactyl", ability: "Glide strike", image: "Pterodactyl-removebg-preview.png" },
+        { name: "Capybara", ability: "Calm aura", image: "CapybaraIIcon-removebg-preview.png" },
+        { name: "Pancake Mole", ability: "Dig escape", image: "Grow-a-Garden-Pancake-Mole-Header__1_-removebg-preview.png" },
+        { name: "Mole", ability: "Tunnel vision", image: "Mole-removebg-preview.png" },
+        { name: "Mimic Octopus", ability: "Illusion clone", image: "MimicOctopusIcon-removebg-preview.png" },
+      ],
+      B: [
+        { name: "Axolotl", ability: "Water heal", image: "Axolotl-removebg-preview.png" },
+        { name: "Seagull", ability: "Ice slide", image: "SeagullIcon-removebg-preview.png" },
+        { name: "Tanuki ", ability: "Freeze touch", image: "grow-a-garden-tanuki-pet-01-removebg-preview.png" },
+        { name: "Mochi Mouse", ability: "Song buff", image: "MochiMouse.webp" },
+        { name: "Golden Lab", ability: "Poison sting", image: "download-removebg-preview.png" },
+        { name: "Frog", ability: "Jump boost", image: "FrogV2-removebg-preview.png" },
+      ],
+      C: [
+        { name: "Dog", ability: "Loyal companion", image: "DogPet-removebg-preview.png" },
+        { name: "Cat", ability: "Scratch attack", image: "Catpet-removebg-preview (1).png" },
+        { name: "Bunny", ability: "Quick dash", image: "BunnyPet-removebg-preview.png" },
+        { name: "Chicken Zombie", ability: "Peck", image: "Chicken_Zombie_Icon-removebg-preview.png" },
+        { name: "Squirrel", ability: "Acorn throw", image: "Squirrel_Icon-removebg-preview (1).png" },
+        { name: "Blood Hedgehog", ability: "Bleed attack", image: "Blood_Hedgehog_Icon-removebg-preview.png" },
+      ]
+    };
+
+    const tierNames = {
+      S: "S TIER (TOP LEGENDARY)",
+      A: "A TIER (HIGH-VALUE)",
+      B: "B TIER (MODERATE)",
+      C: "C TIER (COMMON)"
+    };
+
+      const selectedPets = [];
+
+    function renderPets() {
+      const container = document.getElementById('petContainer');
+      container.innerHTML = '';
+
+      for (const tier in pets) {
+        const section = document.createElement('div');
+        section.className = 'tier-section';
+
+        const title = document.createElement('div');
+        title.className = 'tier-title';
+        title.textContent = `Tier ${tier}`;
+        section.appendChild(title);
+
+        const grid = document.createElement('div');
+        grid.className = 'pet-grid';
+
+        pets[tier].forEach((pet) => {
+          const card = document.createElement('div');
+          card.className = 'pet-card';
+          card.onclick = () => toggleSelect(card, pet);
+
+          const img = document.createElement('img');
+          img.className = 'pet-image';
+          img.src = pet.image || 'https://via.placeholder.com/100';
+          img.alt = pet.name;
+
+          const name = document.createElement('h3');
+          name.textContent = pet.name;
+
+          const ability = document.createElement('p');
+          ability.textContent = pet.ability;
+
+          const viewBtn = document.createElement('button');
+          viewBtn.className = 'view-selected-btn';
+          viewBtn.textContent = 'Show All Pets';
+          viewBtn.onclick = (e) => {
+            e.stopPropagation();
+            showModal();
+          };
+
+          card.appendChild(img);
+          card.appendChild(name);
+          card.appendChild(ability);
+          card.appendChild(viewBtn);
+          grid.appendChild(card);
+        });
+
+        section.appendChild(grid);
+        container.appendChild(section);
+      }
+    }
+
+    function toggleSelect(card, pet) {
+      card.classList.toggle('selected');
+      const index = selectedPets.findIndex(p => p.name === pet.name);
+      if (index > -1) {
+        selectedPets.splice(index, 1);
+      } else {
+        selectedPets.push(pet);
+      }
+      updateSelectionBanner();
+    }
+
+    function updateSelectionBanner() {
+      const banner = document.getElementById('selectionMessage');
+      banner.innerHTML = `You selected ${selectedPets.length} pets — Claim now or add more packages.
+      <button class="claim-now-btn" onclick="showModal()">Claim Now</button>`;
+    }
+
+    function showModal() {
+      const modal = document.getElementById('overlay');
+      const list = document.getElementById('selectedPetList');
+      list.innerHTML = '';
+
+      selectedPets.forEach(pet => {
+        const item = document.createElement('div');
+        item.className = 'selected-pet';
+
+        const img = document.createElement('img');
+        img.src = pet.image || 'https://via.placeholder.com/40';
+        img.alt = pet.name;
+
+        const name = document.createElement('span');
+        name.textContent = `${pet.name} - ${pet.ability}`;
+
+        item.appendChild(img);
+        item.appendChild(name);
+        list.appendChild(item);
+      });
+
+      modal.classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('overlay').classList.remove('active');
+    }
+
+    document.getElementById('searchInput').addEventListener('input', function () {
+      const term = this.value.toLowerCase();
+      document.querySelectorAll('.pet-card').forEach(card => {
+        const name = card.querySelector('h3').textContent.toLowerCase();
+        const ability = card.querySelector('p').textContent.toLowerCase();
+        card.style.display = name.includes(term) || ability.includes(term) ? '' : 'none';
+      });
+    });
+
+    renderPets();
+  </script>
+</body>
+</html>
