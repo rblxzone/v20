@@ -525,26 +525,17 @@ const pets = {
       C: "🌟 C TIER (COMMON) 🌟"
     };
 
-    const selectedPets = new Set();
+  const selectedPets = new Set();
 
-    function createConfetti() {
-      const colors = ['#ff6b9d', '#48dbfb', '#ff9ff3', '#feca57', '#ff4757'];
-      for (let i = 0; i < 20; i++) {
-        const confetti = document.createElement('div');
-        confetti.className = 'confetti';
-        confetti.style.left = Math.random() * 100 + 'vw';
-        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-        confetti.style.animationDelay = Math.random() * 3 + 's';
-        document.body.appendChild(confetti);
-        setTimeout(() => confetti.remove(), 3000);
-      }
+    function getMainImage(pet) {
+      return pet.image && Array.isArray(pet.image) ? pet.image[0] : 'https://via.placeholder.com/100';
     }
 
     function renderPets() {
       const container = document.getElementById("tierListContainer");
       container.innerHTML = '';
 
-      for (const [tier, petList] of Object.entries(pets)) {
+      Object.entries(pets).forEach(([tier, petList]) => {
         const section = document.createElement("div");
         section.innerHTML = `<h2 class="tier-title">${tierNames[tier]}</h2><div class="pet-grid"></div>`;
         const grid = section.querySelector('.pet-grid');
@@ -553,32 +544,22 @@ const pets = {
           const card = document.createElement("div");
           card.className = "pet-card";
           card.onclick = () => toggleSelect(pet.name, card);
-          // Support multiple images, try each until one loads
-          let imgSrc = 'https://via.placeholder.com/100';
-          if (pet.images && Array.isArray(pet.images)) {
-            imgSrc = pet.images[0];
-          } else if (pet.image) {
-            imgSrc = pet.image;
-          }
+
           const img = document.createElement("img");
           img.className = "pet-image";
-          img.src = imgSrc;
-          // If first image fails, try the next
-          if (pet.images && pet.images.length > 1) {
-            img.onerror = function() {
-              img.src = pet.images[1];
-            };
+          img.src = getMainImage(pet);
+
+          if (pet.image && pet.image.length > 1) {
+            img.onerror = () => img.src = pet.image[1];
           }
-          card.innerHTML = `
-            <strong>${pet.name}</strong><br/>
-            <button class="view-selected-btn" onclick="showClaimModal(event)">👀 View Selected Pets</button>
-          `;
+
+          card.innerHTML = `<strong>${pet.name}</strong><br/><button class="view-selected-btn" onclick="showClaimModal(event)">👀 View Selected Pets</button>`;
           card.prepend(img);
           grid.appendChild(card);
         });
 
         container.appendChild(section);
-      }
+      });
     }
 
     function toggleSelect(name, card) {
@@ -588,7 +569,6 @@ const pets = {
       } else {
         selectedPets.add(name);
         card.classList.add("selected");
-        createConfetti();
       }
       updateSelectionMessage();
     }
@@ -602,7 +582,6 @@ const pets = {
 
     function showClaimModal(event) {
       if (event) event.stopPropagation();
-
       const list = document.getElementById("selectedPetList");
       list.innerHTML = '';
 
@@ -610,21 +589,16 @@ const pets = {
         if (selectedPets.has(pet.name)) {
           const div = document.createElement("div");
           div.className = "selected-pet";
-          let imgSrc = 'https://via.placeholder.com/100';
-          if (pet.images && Array.isArray(pet.images)) {
-            imgSrc = pet.images[0];
-          } else if (pet.image) {
-            imgSrc = pet.image;
-          }
+
           const img = document.createElement("img");
-          img.src = imgSrc;
-          if (pet.images && pet.images.length > 1) {
-            img.onerror = function() {
-              img.src = pet.images[1];
-            };
+          img.src = getMainImage(pet);
+          if (pet.image && pet.image.length > 1) {
+            img.onerror = () => img.src = pet.image[1];
           }
+
           const info = document.createElement("div");
           info.innerHTML = `<strong>${pet.name}</strong><br/>Ability: ${pet.ability}`;
+
           div.appendChild(img);
           div.appendChild(info);
           list.appendChild(div);
@@ -633,7 +607,6 @@ const pets = {
 
       document.querySelector('.modal a').href = robloxLink;
       document.getElementById("overlay").classList.add("active");
-      createConfetti();
     }
 
     function closeModal() {
